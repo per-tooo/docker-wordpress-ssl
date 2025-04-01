@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_USER: [ redacted ]
+      MYSQL_DATABASE: [ redacted ]
+      MYSQL_PASSWORD: [ redacted ]
+      MYSQL_ROOT_PASSWORD: [ redacted ]
+    volumes:
+      - db_data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress
+    depends_on:
+      - db
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: [ redacted ]
+      WORDPRESS_DB_NAME: [ redacted ]
+      WORDPRESS_DB_PASSWORD: [ redacted ]
+    volumes:
+      - ./wp-config.php:/var/www/html/wp-config.php
+
+  proxy:
+    image: nginx:latest
+    container_name: nginx_proxy
+    depends_on:
+      - wordpress
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - /root/docker/certs:/etc/nginx/certs
+
+volumes:
+  db_data:
